@@ -26,9 +26,9 @@ This define the number of files that will be kept for each type of backup.
 
 ### ⏰ Cron example 
 ```bash
-0 2 * * 0 /path/to/runtipi/scripts/backup-apps.sh daily
-0 3 * * 0 /path/to/runtipi/scripts/backup-apps.sh weekly
-0 4 * * 0 /path/to/runtipi/scripts/backup-apps.sh monthly
+0 2 * * 0 /path/to/runtipi/scripts/backup_runtipi_apps.sh daily
+0 3 * * 0 /path/to/runtipi/scripts/backup_runtipi_apps.sh weekly
+0 4 * * 0 /path/to/runtipi/scripts/backup_runtipi_apps.sh monthly
 ```
 
 ## ✨ How to restore an app ?
