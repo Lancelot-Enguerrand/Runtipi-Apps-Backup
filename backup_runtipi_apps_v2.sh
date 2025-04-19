@@ -79,14 +79,14 @@ do
         # Stop the app if it was asked
         if [ "$stopApp" = 'stop' ]; then
             cd $runtipiPath
-            appStatusCheck=$(docker ps -f name=^/$app$ -q)
+            appStatusCheck=$(docker ps -f name=^/$app"_"$appStore -q)
             if [ -z "$appStatusCheck" ]; then
                 appOrginalStatus='stopped'
                 echo "App $app is already stopped"
             else
                 appOrginalStatus='started'
                 echo "Stopping $app"
-                ./runtipi-cli app stop $app
+                ./runtipi-cli app stop $app:$appStore
             fi
         fi
 
