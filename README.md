@@ -49,7 +49,7 @@ You will need a job scheduler to execute the script accordingly with your backup
 🤓 Advanced configuration avoiding to perform 2 backups the same day *(unless the 1st day of the month is a monday)*
 ```bash
 # Every day from Tuesday to Sunday at 2 AM - daily
-0 2 * * 2-7 /path/to/runtipi/scripts/backup_runtipi_apps.sh daily
+0 2 2-31 * 2-7 /path/to/runtipi/scripts/backup_runtipi_apps.sh daily
 
 # Every Monday at 2 AM - weekly
 0 2 * * 1 /path/to/runtipi/scripts/backup_runtipi_apps.sh weekly
