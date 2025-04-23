@@ -8,7 +8,7 @@
 # Specify your runtipi base path
 runtipiPath=""
  
-# Storage path for the Apps (each app have a folder inside)
+# Storage path for the Apps
 backupPath="$runtipiPath/backups"
 
 # Specify backup retention - Indicate number of backup file to keep for each schedule
@@ -25,7 +25,7 @@ userConfigsPath="$runtipiPath/user-config"
 # Define the temporary directory for the archive creation
 archiveCreatingWorkDir="/tmp"
 
-# App status - Set defaut value to prevent bug - do not touch
+# App status - Set defaut value to started
 appOrginalStatus='started'
 
 # Check for runtipi path value
@@ -87,6 +87,7 @@ do
                 appOrginalStatus='started'
                 echo "Stopping $app"
                 ./runtipi-cli app stop $app:$appStore
+                sleep 5
             fi
         fi
 
@@ -145,6 +146,7 @@ do
             cd $runtipiPath
             echo "Starting $app"
             ./runtipi-cli app start $app
+            sleep 5
         fi
     done
 done
