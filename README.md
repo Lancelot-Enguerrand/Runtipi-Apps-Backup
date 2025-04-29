@@ -31,34 +31,19 @@ This define the number of files that will be kept for each type of backup.
 ### ⏰ Cron example
 You will need a job scheduler to execute the script accordingly with your backup strategy, 2 examples with Cron below :
 
-👶 Basic examples with daily, weekly, monthly and yearly
-```bash
-# Every day at 2 AM - daily
-0 2 * * * /path/to/runtipi/scripts/backup_runtipi_apps.sh daily
-
-# Every Monday at 3 AM - weekly
-0 3 * * 1 /path/to/runtipi/scripts/backup_runtipi_apps.sh weekly
-
-# Every 1st day of the month at 4 AM - monthly
-0 4 1 * * /path/to/runtipi/scripts/backup_runtipi_apps.sh monthly
-
-# Every 1st day of January at 5 AM - yearly
-0 5 1 1 * /path/to/runtipi/scripts/backup_runtipi_apps.sh yearly
-```
-
-🤓 Advanced configuration avoiding to perform 2 backups the same day *(unless the 1st day of the month is a monday)*
+Basic example with all types daily, weekly, monthly and yearly
 ```bash
 # Every day from Tuesday to Sunday at 2 AM - daily
-0 2 2-31 * 2-7 /path/to/runtipi/scripts/backup_runtipi_apps.sh daily
+0 2 * * 2-7 /path/to/runtipi/scripts/backup_runtipi_apps.sh daily
 
 # Every Monday at 2 AM - weekly
 0 2 * * 1 /path/to/runtipi/scripts/backup_runtipi_apps.sh weekly
 
-# Every 1st day of the month from February to December at 3 AM - monthly
-0 3 1 2-12 * /path/to/runtipi/scripts/backup_runtipi_apps.sh monthly
+# Every 1st day of the month at 3 AM - monthly
+0 3 1 * * /path/to/runtipi/scripts/backup_runtipi_apps.sh monthly
 
-# Every 1st day of January at 3 AM - yearly
-0 3 1 1 * /path/to/runtipi/scripts/backup_runtipi_apps.sh yearly
+# Every 1st day of January at 4 AM - yearly
+0 4 1 1 * /path/to/runtipi/scripts/backup_runtipi_apps.sh yearly
 ```
 
 ## ✨ How to restore an app ?
