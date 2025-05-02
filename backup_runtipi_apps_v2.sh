@@ -145,7 +145,7 @@ do
         if [ "$stopApp" = 'stop' -a "$appOrginalStatus" = 'started' ]; then
             cd $runtipiPath
             echo "Starting $app"
-            ./runtipi-cli app start $app
+            ./runtipi-cli app start $app:$appStore
             sleep 5
         fi
     done
