@@ -129,9 +129,6 @@ do
         # Creating archive
         echo "Creating $app archive : $backupFileName"
         tar -czhf "$backupFileName" -C "$tempArchiveDir" .
-        # Move archive to Backup storage
-        echo "Moving $backupFileName to $backupAppPath"
-        mv "$backupFileName" "$backupAppPath"
         # Remove temporary Directory
         echo "Removing temporary files"
         rm -rf "$tempArchiveDir"
