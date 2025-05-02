@@ -11,11 +11,14 @@ runtipiPath=""
 # Storage path for the Apps
 backupPath="$runtipiPath/backups"
 
-# Specify backup retention - Indicate number of backup file to keep for each schedule
+# Specify backup retention - Number of backup file to keep for each schedule
 dailyRetention=3
 weeklyRetention=3
 monthlyRetention=3
 yearlyRetention=3
+
+# Sleep Duration - How many seconds to wait after starting/stopping an apps
+sleepDuration=10
 
 # Default runtipi paths
 appsDataPath="$runtipiPath/app-data"
@@ -87,7 +90,7 @@ do
                 appOrginalStatus='started'
                 echo "Stopping $app"
                 ./runtipi-cli app stop $app:$appStore
-                sleep 5
+                sleep $sleepDuration
             fi
         fi
 
@@ -143,7 +146,7 @@ do
             cd $runtipiPath
             echo "Starting $app"
             ./runtipi-cli app start $app:$appStore
-            sleep 5
+            sleep $sleepDuration
         fi
     done
 done
