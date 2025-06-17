@@ -109,8 +109,7 @@ do
                     sleep $sleepDuration
                 fi
             fi
-    
-            echo "Preparing $app backup"
+
             # Set destination app path
             backupAppPath="$backupPath/$appStore/$app"
             # Create destination directory if doesnt exist
@@ -140,6 +139,8 @@ do
                 if [ -d "$src" ]; then
                     # Create symbolic link for each directory
                     ln -s "$src" "$dest"
+                elif [ $src = "$userConfigsPath/$appStore/$app" ]; then
+                    : # echo "No user config for $app"
                 else
                     echo "Directory $src does not exist, skipped."
                 fi
