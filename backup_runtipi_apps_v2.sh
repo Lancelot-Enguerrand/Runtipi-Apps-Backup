@@ -4,13 +4,13 @@
 #
 # Usage: ./backup_runtipi_apps.sh [daily|weekly|monthly|yearly] [stop|ignore]
 # Default parameters are daily stop
- 
+
 # Specify your runtipi base path
 runtipiPath=""
 
 # Specify path to you backup reference list (optional)
 backupListPath=""
- 
+
 # Storage path for the Apps
 backupPath="$runtipiPath/backups"
 
@@ -46,7 +46,7 @@ else
     echo "Edit path, line 9 in $0"
     exit 1
 fi
- 
+
 # Default Parameters
 backupTypeDefaultValue='daily'
 stopAppDefaultValue='stop'
@@ -72,7 +72,15 @@ case "$backupType" in
         exit 2
         ;;
 esac
- 
+
+# Check Runtipi version
+runtipiVersion=$(cat $runtipiPath/VERSION)
+runtipiMajorVersion=$(echo $runtipiPath | cut -d. -f1 VERSION | sed 's/^v//')
+if [ "$major_version" -lt 4 ]; then
+    echo "Runtipi version is $runtipiVersion, this script require at least v4.0.0"
+    exit 4
+fi
+
 # Should Apps be stopped during backup
 stopApp="${2:-$stopAppDefaultValue}"
 
