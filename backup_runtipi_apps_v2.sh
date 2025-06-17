@@ -90,12 +90,10 @@ do
         exit 3
     fi
     # List all installed apps
-    for app in backupList
+    for app in $backupList
     do
-        if [ -z $(ls $appsPath/$appStore/$app)]; then
-            echo "$app does not exist in $appstore appstore."
-        else
-            echo "Starting backup for apps from $appstore appstore."
+        if [ -d $appsPath/$appStore/$app ]; then
+            echo "Starting backup apps from $appStore appstore."
             
             # Stop the app if it was asked
             if [ "$stopApp" = 'stop' ]; then
@@ -120,7 +118,7 @@ do
             # Generate archive name
             backupFileName="$app-$backupType-$(date '+%Y-%m-%d').tar.gz"
     
-            # Uncomment next line if you want the archive to be created directly in backup destination
+            # Use backup directory as archive file destination
             archiveCreatingWorkDir="$backupAppPath"
     
             # Move to Working Directory for archive creation
