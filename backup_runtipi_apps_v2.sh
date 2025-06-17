@@ -7,6 +7,9 @@
  
 # Specify your runtipi base path
 runtipiPath=""
+
+# Specify path to you backup reference list (optional)
+backupListPath=""
  
 # Storage path for the Apps
 backupPath="$runtipiPath/backups"
@@ -76,77 +79,93 @@ stopApp="${2:-$stopAppDefaultValue}"
 # List all appstores
 for appStore in $(ls $appsPath)
 do
+    # Check optional apps reference list
+    refBackupList=$backupListPath
+    if [ -z "$refBackupList" ]; then
+        backupList=$(ls $appsPath/$appStore)
+    elif [ -f "$refBackupList" ]; then
+        backupList=$(cat $refBackupList)
+    else
+        echo "Invalid path for backup reference list file."
+        exit 3
+    fi
     # List all installed apps
-    for app in $(ls $appsPath/$appStore)
+    for app in backupList
     do
-        # Stop the app if it was asked
-        if [ "$stopApp" = 'stop' ]; then
-            cd $runtipiPath
-            appStatusCheck=$(docker ps -f name=^/$app"_"$appStore -q)
-            if [ -z "$appStatusCheck" ]; then
-                appOrginalStatus='stopped'
-                echo "App $app is already stopped"
-            else
-                appOrginalStatus='started'
-                echo "Stopping $app"
-                ./runtipi-cli app stop $app:$appStore
+        if [ -z $(ls $appsPath/$appStore/$app)]; then
+            echo "$app does not exist in $appstore appstore."
+        else
+            echo "Starting backup for apps from $appstore appstore."
+            
+            # Stop the app if it was asked
+            if [ "$stopApp" = 'stop' ]; then
+                cd $runtipiPath
+                appStatusCheck=$(docker ps -f name=^/$app"_"$appStore -q)
+                if [ -z "$appStatusCheck" ]; then
+                    appOrginalStatus='stopped'
+                    echo "App $app is already stopped"
+                else
+                    appOrginalStatus='started'
+                    echo "Stopping $app"
+                    ./runtipi-cli app stop $app:$appStore
+                    sleep $sleepDuration
+                fi
+            fi
+    
+            echo "Preparing $app backup"
+            # Set destination app path
+            backupAppPath="$backupPath/$appStore/$app"
+            # Create destination directory if doesnt exist
+            if [ ! -d "$backupAppPath" ]; then mkdir -p "$backupAppPath"; fi
+            # Generate archive name
+            backupFileName="$app-$backupType-$(date '+%Y-%m-%d').tar.gz"
+    
+            # Uncomment next line if you want the archive to be created directly in backup destination
+            archiveCreatingWorkDir="$backupAppPath"
+    
+            # Move to Working Directory for archive creation
+            cd $archiveCreatingWorkDir
+    
+            # Declare source and destination path for directories in archive
+            declare -A app_paths=(
+                ["$appsPath/$appStore/$app"]="app"
+                ["$appsDataPath/$appStore/$app"]="app-data"
+                ["$userConfigsPath/$appStore/$app"]="user-config"
+            )
+    
+            echo "Preparing $app files"
+            tempArchiveDir=$(mktemp -d)
+            for src in "${!app_paths[@]}"; do
+                dest="$tempArchiveDir/${app_paths[$src]}"
+                echo $dest
+                # Ensure the directory exists
+                if [ -d "$src" ]; then
+                    # Create symbolic link for each directory
+                    ln -s "$src" "$dest"
+                else
+                    echo "Directory $src does not exist, skipped."
+                fi
+            done
+    
+            # Creating archive
+            echo "Creating $app archive : $backupFileName"
+            tar -czhf "$backupFileName" -C "$tempArchiveDir" .
+            # Remove temporary Directory
+            echo "Removing temporary files"
+            rm -rf "$tempArchiveDir"
+    
+            # Purge old backups of the same type
+            cd "$backupAppPath"
+            echo "Purging old $backupType backup for $app"
+            ls -t | grep "$app-$backupType-" | tail -n +$((keepLast+1)) | xargs -r rm --
+    
+            # Restart the app if it was asked to be stopped
+            if [ "$stopApp" = 'stop' -a "$appOrginalStatus" = 'started' ]; then
+                cd $runtipiPath
+                echo "Starting $app"
+                ./runtipi-cli app start $app:$appStore
                 sleep $sleepDuration
             fi
-        fi
-
-        echo "Preparing $app backup"
-        # Set destination app path
-        backupAppPath="$backupPath/$appStore/$app"
-        # Create destination directory if doesnt exist
-        if [ ! -d "$backupAppPath" ]; then mkdir -p "$backupAppPath"; fi
-        # Generate archive name
-        backupFileName="$app-$backupType-$(date '+%Y-%m-%d').tar.gz"
-
-        # Uncomment next line if you want the archive to be created directly in backup destination
-        archiveCreatingWorkDir="$backupAppPath"
-
-        # Move to Working Directory for archive creation
-        cd $archiveCreatingWorkDir
-
-        # Declare source and destination path for directories in archive
-        declare -A app_paths=(
-            ["$appsPath/$appStore/$app"]="app"
-            ["$appsDataPath/$appStore/$app"]="app-data"
-            ["$userConfigsPath/$appStore/$app"]="user-config"
-        )
-
-        echo "Preparing $app files"
-        tempArchiveDir=$(mktemp -d)
-        for src in "${!app_paths[@]}"; do
-            dest="$tempArchiveDir/${app_paths[$src]}"
-            echo $dest
-            # Ensure the directory exists
-            if [ -d "$src" ]; then
-                # Create symbolic link for each directory
-                ln -s "$src" "$dest"
-            else
-                echo "Directory $src does not exist, skipped."
-            fi
-        done
-
-        # Creating archive
-        echo "Creating $app archive : $backupFileName"
-        tar -czhf "$backupFileName" -C "$tempArchiveDir" .
-        # Remove temporary Directory
-        echo "Removing temporary files"
-        rm -rf "$tempArchiveDir"
-
-        # Purge old backups of the same type
-        cd "$backupAppPath"
-        echo "Purging old $backupType backup for $app"
-        ls -t | grep "$app-$backupType-" | tail -n +$((keepLast+1)) | xargs -r rm --
-
-        # Restart the app if it was asked to be stopped
-        if [ "$stopApp" = 'stop' -a "$appOrginalStatus" = 'started' ]; then
-            cd $runtipiPath
-            echo "Starting $app"
-            ./runtipi-cli app start $app:$appStore
-            sleep $sleepDuration
         fi
     done
 done
