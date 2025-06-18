@@ -31,19 +31,17 @@ userConfigsPath="$runtipiPath/user-config"
 # Define the temporary directory for the archive creation
 archiveCreatingWorkDir="/tmp"
 
-# App status - Set defaut value to started
-appOrginalStatus='started'
+# App status - Set default value to started
+appOriginalStatus='started'
 
 # Check for runtipi path value
 if [ -z "$runtipiPath" ]; then
     echo "Runtipi path not specified"
-    echo "Edit path, line 9 in $0"
     exit 1
 elif [ -d "$runtipiPath" ]; then
     echo "Runtipi path : $runtipiPath"
 else
     echo "Runtipi path not found : $runtipiPath"
-    echo "Edit path, line 9 in $0"
     exit 1
 fi
 
@@ -75,7 +73,7 @@ esac
 
 # Check Runtipi version
 runtipiVersion=$(cat $runtipiPath/VERSION)
-runtipiMajorVersion=$(echo $runtipiPath | cut -d. -f1 VERSION | sed 's/^v//')
+runtipiMajorVersion=$(echo $runtipiVersion | cut -d. -f1 VERSION | sed 's/^v//')
 if [ "$major_version" -lt 4 ]; then
     echo "Runtipi version is $runtipiVersion, this script require at least v4.0.0"
     exit 4
@@ -108,10 +106,10 @@ do
                 cd $runtipiPath
                 appStatusCheck=$(docker ps -f name=^/$app"_"$appStore -q)
                 if [ -z "$appStatusCheck" ]; then
-                    appOrginalStatus='stopped'
+                    appOriginalStatus='stopped'
                     echo "App $app is already stopped"
                 else
-                    appOrginalStatus='started'
+                    appOriginalStatus='started'
                     echo "Stopping $app"
                     ./runtipi-cli app stop $app:$appStore
                     sleep $sleepDuration
@@ -127,17 +125,17 @@ do
     
             # Use backup directory as archive file destination
             archiveCreatingWorkDir="$backupAppPath"
-    
+
             # Move to Working Directory for archive creation
             cd $archiveCreatingWorkDir
-    
+
             # Declare source and destination path for directories in archive
             declare -A app_paths=(
                 ["$appsPath/$appStore/$app"]="app"
                 ["$appsDataPath/$appStore/$app"]="app-data"
                 ["$userConfigsPath/$appStore/$app"]="user-config"
             )
-    
+
             echo "Preparing $app files"
             tempArchiveDir=$(mktemp -d)
             for src in "${!app_paths[@]}"; do
@@ -153,21 +151,21 @@ do
                     echo "Directory $src does not exist, skipped."
                 fi
             done
-    
+
             # Creating archive
             echo "Creating $app archive : $backupFileName"
             tar -czhf "$backupFileName" -C "$tempArchiveDir" .
             # Remove temporary Directory
             echo "Removing temporary files"
             rm -rf "$tempArchiveDir"
-    
+
             # Purge old backups of the same type
             cd "$backupAppPath"
             echo "Purging old $backupType backup for $app"
             ls -t | grep "$app-$backupType-" | tail -n +$((keepLast+1)) | xargs -r rm --
     
             # Restart the app if it was asked to be stopped
-            if [ "$stopApp" = 'stop' -a "$appOrginalStatus" = 'started' ]; then
+            if [ "$stopApp" = 'stop' -a "$appOriginalStatus" = 'started' ]; then
                 cd $runtipiPath
                 echo "Starting $app"
                 ./runtipi-cli app start $app:$appStore
